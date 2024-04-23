@@ -1,0 +1,33 @@
+# services:
+#   article-grabber:
+#     build: article-grabber
+
+#   llm-model:
+#     build: llm-model
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    volumes:
+      - .:/code
+      - ./ollama/ollama:/root/.ollama
+    container_name: ollama
+    pull_policy: always
+    tty: true
+    restart: always
+    networks:
+      - ollama-docker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  model:
+    build: llm-model/
+networks:
+  ollama-docker:
+    external: false
