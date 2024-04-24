@@ -6,19 +6,45 @@
 #     build: llm-model
 
 services:
-  ollama:
-    image: ollama/ollama:latest
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - 11434:11434
+  #   volumes:
+  #     - .:/code
+  #     - ./ollama/ollama:/root/.ollama
+  #   container_name: ollama
+  #   pull_policy: always
+  #   tty: true
+  #   restart: always
+  #   networks:
+  #     - ollama-docker
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  model:
+    build: llm-model/
     ports:
       - 11434:11434
     volumes:
-      - .:/code
-      - ./ollama/ollama:/root/.ollama
+      - ./llm-model:/code
+      - ./llm-model/ollama/ollama:/root/.ollama
     container_name: ollama
     pull_policy: always
     tty: true
     restart: always
     networks:
       - ollama-docker
+    healthcheck:
+      test: ["CMD-SHELL","ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         reservations:
@@ -26,8 +52,14 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-  model:
-    build: llm-model/
+  # ollama-setup:
+  #     build: llm-model/
+  #     depends_on:
+  #       model:
+  #         condition: service_healthy
+  #     restart: "no"
+  #     entrypoint: [ "bash", "-c", "/root/create_model.sh"]
+
 networks:
   ollama-docker:
     external: false

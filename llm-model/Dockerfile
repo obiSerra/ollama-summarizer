@@ -1,3 +1,9 @@
-FROM ollama/ollama:0.1.17
+FROM ollama/ollama:latest
 
-COPY ./Modelfile /root/.ollama/
+
+COPY Modelfile /root
+COPY create_model.sh /root
+
+WORKDIR /root
+
+# RUN bash -c "./create_model.sh"
